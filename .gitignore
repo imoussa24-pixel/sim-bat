@@ -8,3 +8,4 @@ server/prisma/schema.postgres.prisma
 server/uploads/
 server/sauvegardes/
 client/dist/
+.claude/settings.local.json
