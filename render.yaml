@@ -1,0 +1,38 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# SIM-BAT — Déploiement Render (plan gratuit, pour essai / accès distant)
+# Dans Render : New + → Blueprint → sélectionner ce dépôt → Apply.
+#
+# Notes plan gratuit :
+#  • Le service s'endort après 15 min d'inactivité (réveil ~50 s au 1er accès).
+#  • Le disque est éphémère : les PHOTOS/JUSTIFICATIFS uploadés sont perdus au
+#    redéploiement (les données, elles, sont en PostgreSQL et persistent).
+#  • La base PostgreSQL gratuite expire après 30 jours (prévenu par email) —
+#    passer au plan payant ou exporter avant échéance.
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  - type: web
+    name: sim-bat
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm run build:render
+    startCommand: npm run start:render
+    healthCheckPath: /api/sante
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sim-bat-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+databases:
+  - name: sim-bat-db
+    plan: free
+    region: frankfurt
+    databaseName: simbat
+    user: simbat

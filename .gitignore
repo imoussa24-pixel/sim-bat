@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.log
+.env
+server/prisma/dev.db
+server/prisma/dev.db-journal
+server/prisma/schema.postgres.prisma
+server/uploads/
+server/sauvegardes/
+client/dist/

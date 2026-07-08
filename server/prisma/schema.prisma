@@ -1,0 +1,428 @@
+// SIM-BAT — Schéma de base de données (SQLite via Prisma)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ─────────────────────────── Utilisateurs & Auth ───────────────────────────
+
+model Utilisateur {
+  id             String         @id @default(cuid())
+  nom            String
+  email          String         @unique
+  motDePasseHash String
+  role           String // ADMIN | CHEF_PROJET | CONDUCTEUR | COMPTABLE | MAGASINIER | LECTURE
+  actif          Boolean        @default(true)
+  refreshTokens  RefreshToken[]
+  createdAt      DateTime       @default(now())
+  deletedAt      DateTime?
+}
+
+model RefreshToken {
+  id        String      @id @default(cuid())
+  token     String      @unique
+  userId    String
+  user      Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+}
+
+// ─────────────────────────────── Gestion ───────────────────────────────────
+
+model Client {
+  id        String    @id @default(cuid())
+  nom       String
+  type      String    @default("particulier") // particulier | entreprise | administration
+  tel       String?
+  email     String?
+  adresse   String?
+  ville     String?
+  nif       String?
+  contact   String? // personne de contact
+  projets   Projet[]
+  devis     Devis[]
+  contrats  Contrat[]
+  factures  Facture[]
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model Projet {
+  id              String     @id @default(cuid())
+  nom             String
+  description     String?
+  clientId        String?
+  client          Client?    @relation(fields: [clientId], references: [id])
+  responsableId   String?
+  responsable     Employe?   @relation(fields: [responsableId], references: [id])
+  budget          Float      @default(0)
+  dateDebut       DateTime?
+  livraisonPrevue DateTime?
+  statut          String     @default("Planifié") // Démarré | Planifié | En cours | Arrêté | Livré | En pause | Terminé | Annulé
+  avancement      Float      @default(0)
+  localites       String?
+  chantiers       Chantier[]
+  devis           Devis[]
+  contrats        Contrat[]
+  factures        Facture[]
+  createdAt       DateTime   @default(now())
+  deletedAt       DateTime?
+}
+
+model Chantier {
+  id              String           @id @default(cuid())
+  projetId        String?
+  projet          Projet?          @relation(fields: [projetId], references: [id])
+  nom             String
+  ville           String?
+  dateDebut       DateTime?
+  dateFin         DateTime? // date fin contractuelle
+  budget          Float            @default(0)
+  statut          String           @default("En attente") // En attente | En cours | Terminé
+  avancement      Float            @default(0)
+  chefId          String?
+  chef            Employe?         @relation("ChefChantier", fields: [chefId], references: [id])
+  planningCalcule Boolean          @default(false)
+  finPrevue       DateTime? // fin calculée par le CPM
+  lots            Lot[]
+  baselines       Baseline[]
+  depenses        Depense[]
+  pointages       Pointage[]
+  employes        Employe[]        @relation("AffectationChantier")
+  materiels       Materiel[]
+  stockMouvements StockMouvement[]
+  rapports        RapportJournalier[]
+  commentaires    Commentaire[]
+  createdAt       DateTime         @default(now())
+  deletedAt       DateTime?
+}
+
+// ───────────────────────────── Planification ───────────────────────────────
+
+model Lot {
+  id         String    @id @default(cuid())
+  chantierId String
+  chantier   Chantier  @relation(fields: [chantierId], references: [id], onDelete: Cascade)
+  nom        String
+  ordre      Int       @default(0)
+  taches     Tache[]
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+}
+
+model Tache {
+  id                 String            @id @default(cuid())
+  lotId              String
+  lot                Lot               @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  nom                String
+  dureeJours         Float             @default(1)
+  dateDebutSouhaitee DateTime? // contrainte "ne pas commencer avant"
+  dateDebut          DateTime? // calculée par CPM
+  dateFin            DateTime? // calculée par CPM
+  avancement         Float             @default(0)
+  estJalon           Boolean           @default(false)
+  estCritique        Boolean           @default(false)
+  margeTotale        Float? // en jours ouvrés
+  ordre              Int               @default(0)
+  responsableId      String?
+  responsable        Employe?          @relation(fields: [responsableId], references: [id])
+  predecesseurs      DependanceTache[] @relation("Successeur")
+  successeurs        DependanceTache[] @relation("Predecesseur")
+  ressources         TacheRessource[]
+  createdAt          DateTime          @default(now())
+  deletedAt          DateTime?
+}
+
+model DependanceTache {
+  id             String @id @default(cuid())
+  predecesseurId String
+  predecesseur   Tache  @relation("Predecesseur", fields: [predecesseurId], references: [id], onDelete: Cascade)
+  successeurId   String
+  successeur     Tache  @relation("Successeur", fields: [successeurId], references: [id], onDelete: Cascade)
+  type           String @default("FD") // FD (fin→début) | DD (début→début) | FF (fin→fin) | DF (début→fin)
+  lagJours       Float  @default(0)
+
+  @@unique([predecesseurId, successeurId])
+}
+
+model TacheRessource {
+  id         String    @id @default(cuid())
+  tacheId    String
+  tache      Tache     @relation(fields: [tacheId], references: [id], onDelete: Cascade)
+  employeId  String?
+  employe    Employe?  @relation(fields: [employeId], references: [id])
+  materielId String?
+  materiel   Materiel? @relation(fields: [materielId], references: [id])
+}
+
+model Baseline {
+  id           String   @id @default(cuid())
+  chantierId   String
+  chantier     Chantier @relation(fields: [chantierId], references: [id], onDelete: Cascade)
+  nom          String
+  dateSnapshot DateTime @default(now())
+  donneesJson  String // snapshot des tâches [{id, nom, dateDebut, dateFin, dureeJours}]
+}
+
+// ─────────────────────────────── Ressources ────────────────────────────────
+
+model Employe {
+  id                 String               @id @default(cuid())
+  nom                String
+  poste              String // maçon, ferrailleur, coffreur, chef d'équipe, conducteur…
+  qualification      String?
+  tel                String?
+  tauxJournalier     Float                @default(0)
+  chantierId         String?
+  chantier           Chantier?            @relation("AffectationChantier", fields: [chantierId], references: [id])
+  statut             String               @default("actif") // actif | congé | parti
+  pointages          Pointage[]
+  tachesResponsable  Tache[]
+  chantiersDiriges   Chantier[]           @relation("ChefChantier")
+  projetsResponsable Projet[]
+  ressources         TacheRessource[]
+  mouvements         MouvementMateriel[]
+  createdAt          DateTime             @default(now())
+  deletedAt          DateTime?
+}
+
+model Pointage {
+  id         String   @id @default(cuid())
+  employeId  String
+  employe    Employe  @relation(fields: [employeId], references: [id], onDelete: Cascade)
+  chantierId String
+  chantier   Chantier @relation(fields: [chantierId], references: [id], onDelete: Cascade)
+  date       DateTime
+  present    Boolean  @default(true)
+
+  @@unique([employeId, date])
+}
+
+model Materiel {
+  id           String              @id @default(cuid())
+  designation  String
+  type         String?
+  numeroSerie  String?
+  etat         String              @default("bon") // bon | moyen | panne
+  coutHoraire  Float               @default(0)
+  chantierId   String?
+  chantier     Chantier?           @relation(fields: [chantierId], references: [id])
+  mouvements   MouvementMateriel[]
+  maintenances Maintenance[]
+  ressources   TacheRessource[]
+  createdAt    DateTime            @default(now())
+  deletedAt    DateTime?
+}
+
+model MouvementMateriel {
+  id            String    @id @default(cuid())
+  materielId    String
+  materiel      Materiel  @relation(fields: [materielId], references: [id], onDelete: Cascade)
+  origine       String? // nom chantier origine ou "Dépôt central"
+  destination   String?
+  date          DateTime  @default(now())
+  responsableId String?
+  responsable   Employe?  @relation(fields: [responsableId], references: [id])
+  motif         String?
+  etatDepart    String?
+  etatArrivee   String?
+  deletedAt     DateTime?
+}
+
+model Materiau {
+  id           String           @id @default(cuid())
+  designation  String
+  unite        String // sac, kg, m³, barre, unité…
+  seuilAlerte  Float            @default(0)
+  prixUnitaire Float            @default(0) // prix unitaire moyen pondéré
+  mouvements   StockMouvement[]
+  createdAt    DateTime         @default(now())
+  deletedAt    DateTime?
+}
+
+model StockMouvement {
+  id           String    @id @default(cuid())
+  materiauId   String
+  materiau     Materiau  @relation(fields: [materiauId], references: [id], onDelete: Cascade)
+  chantierId   String? // null = Dépôt central
+  chantier     Chantier? @relation(fields: [chantierId], references: [id])
+  type         String // entree | sortie | inventaire
+  quantite     Float
+  prixUnitaire Float? // pour les entrées (achat)
+  fournisseur  String?
+  motif        String?
+  date         DateTime  @default(now())
+  deletedAt    DateTime?
+}
+
+model Maintenance {
+  id                String    @id @default(cuid())
+  materielId        String
+  materiel          Materiel  @relation(fields: [materielId], references: [id], onDelete: Cascade)
+  type              String    @default("préventive") // préventive | curative
+  datePlanifiee     DateTime?
+  dateRealisee      DateTime?
+  cout              Float     @default(0)
+  description       String?
+  pieces            String?
+  technicien        String?
+  prochaineEcheance DateTime?
+  statut            String    @default("planifiée") // planifiée | réalisée
+  deletedAt         DateTime?
+}
+
+// ──────────────────────────────── Finance ──────────────────────────────────
+
+model Devis {
+  id        String       @id @default(cuid())
+  numero    String       @unique // DEV-AAAA-NNN
+  clientId  String?
+  client    Client?      @relation(fields: [clientId], references: [id])
+  projetId  String?
+  projet    Projet?      @relation(fields: [projetId], references: [id])
+  objet     String?
+  date      DateTime     @default(now())
+  statut    String       @default("brouillon") // brouillon | envoyé | accepté | refusé
+  tvaTaux   Float        @default(19)
+  remise    Float        @default(0) // montant FCFA
+  version   Int          @default(1)
+  notes     String?
+  lignes    LigneDevis[]
+  contrat   Contrat?
+  createdAt DateTime     @default(now())
+  deletedAt DateTime?
+}
+
+model LigneDevis {
+  id           String @id @default(cuid())
+  devisId      String
+  devis        Devis  @relation(fields: [devisId], references: [id], onDelete: Cascade)
+  designation  String
+  unite        String @default("u")
+  quantite     Float  @default(1)
+  prixUnitaire Float  @default(0)
+  ordre        Int    @default(0)
+}
+
+model Contrat {
+  id            String    @id @default(cuid())
+  numero        String    @unique // CTR-AAAA-NNN
+  devisId       String?   @unique
+  devis         Devis?    @relation(fields: [devisId], references: [id])
+  clientId      String?
+  client        Client?   @relation(fields: [clientId], references: [id])
+  projetId      String?
+  projet        Projet?   @relation(fields: [projetId], references: [id])
+  objet         String?
+  montant       Float     @default(0)
+  dateSignature DateTime  @default(now())
+  factures      Facture[]
+  createdAt     DateTime  @default(now())
+  deletedAt     DateTime?
+}
+
+model Facture {
+  id              String     @id @default(cuid())
+  numero          String     @unique // FAC-AAAA-NNN
+  contratId       String?
+  contrat         Contrat?   @relation(fields: [contratId], references: [id])
+  projetId        String?
+  projet          Projet?    @relation(fields: [projetId], references: [id])
+  clientId        String?
+  client          Client?    @relation(fields: [clientId], references: [id])
+  type            String     @default("situation") // acompte | situation | solde
+  objet           String?
+  montant         Float      @default(0)
+  avancementPct   Float? // pour factures de situation
+  retenueGarantie Float      @default(0) // en %
+  date            DateTime   @default(now())
+  echeance        DateTime?
+  statut          String     @default("brouillon") // brouillon | envoyée | partiellement payée | payée | en retard
+  paiements       Paiement[]
+  createdAt       DateTime   @default(now())
+  deletedAt       DateTime?
+}
+
+model Depense {
+  id              String    @id @default(cuid())
+  chantierId      String?
+  chantier        Chantier? @relation(fields: [chantierId], references: [id])
+  categorie       String    @default("divers") // matériaux | main-d'œuvre | sous-traitance | carburant | location | divers
+  fournisseur     String?
+  description     String?
+  montant         Float     @default(0)
+  date            DateTime  @default(now())
+  justificatifUrl String?
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+}
+
+model Paiement {
+  id        String    @id @default(cuid())
+  factureId String?
+  facture   Facture?  @relation(fields: [factureId], references: [id])
+  sens      String    @default("encaissement") // encaissement | decaissement
+  mode      String    @default("virement") // espèces | virement | chèque | mobile money
+  tiers     String? // client ou fournisseur
+  montant   Float     @default(0)
+  date      DateTime  @default(now())
+  reference String?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+// ─────────────────────────────── Système ───────────────────────────────────
+
+model AuditLog {
+  id       String   @id @default(cuid())
+  userId   String?
+  userNom  String?
+  action   String // CREATE | UPDATE | DELETE | LOGIN | CPM
+  entite   String
+  entiteId String?
+  details  String?
+  date     DateTime @default(now())
+}
+
+model Parametre {
+  cle    String @id
+  valeur String
+}
+
+model RapportJournalier {
+  id              String    @id @default(cuid())
+  chantierId      String
+  chantier        Chantier  @relation(fields: [chantierId], references: [id], onDelete: Cascade)
+  date            DateTime  @default(now())
+  meteo           String? // ensoleillé | nuageux | pluie | vent de sable | harmattan
+  effectif        Int       @default(0)
+  travauxRealises String
+  incidents       String?
+  besoins         String? // matériaux / matériel manquants
+  photos          String    @default("[]") // JSON: ["/uploads/…"]
+  redacteurNom    String?
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+}
+
+model Commentaire {
+  id         String   @id @default(cuid())
+  chantierId String
+  chantier   Chantier @relation(fields: [chantierId], references: [id], onDelete: Cascade)
+  auteurId   String?
+  auteurNom  String
+  texte      String
+  date       DateTime @default(now())
+}
+
+model ModeleWbs {
+  id          String   @id @default(cuid())
+  nom         String
+  description String?
+  donneesJson String // [{lot, ordre, taches:[{cle, nom, duree, jalon, deps:[{pred, type, lag}]}]}]
+  createdAt   DateTime @default(now())
+}

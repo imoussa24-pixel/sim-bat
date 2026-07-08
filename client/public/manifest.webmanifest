@@ -1,0 +1,18 @@
+{
+  "name": "SIM-BAT — Gestion BTP",
+  "short_name": "SIM-BAT",
+  "description": "Gestion d'entreprise BTP : chantiers, planification CPM, finance, ressources.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e2430",
+  "theme_color": "#1e2430",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icone.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

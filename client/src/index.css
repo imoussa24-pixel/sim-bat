@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  @apply bg-fond text-slate-800 antialiased;
+}
+
+/* ─────────────────────────── Animations ─────────────────────────── */
+
+@keyframes apparition {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fondu {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes surgir {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes glisserGauche {
+  from { opacity: 0; transform: translateX(110%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes flottement {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -25px) scale(1.08); }
+}
+@keyframes pulsationDouce {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@keyframes miroitement {
+  from { background-position: -400px 0; }
+  to { background-position: 400px 0; }
+}
+
+/* Transition de page (contenu principal) */
+.animation-page {
+  animation: apparition 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Grilles à apparition décalée */
+.grille-animee > * {
+  opacity: 0;
+  animation: apparition 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.grille-animee > *:nth-child(1) { animation-delay: 0.03s; }
+.grille-animee > *:nth-child(2) { animation-delay: 0.08s; }
+.grille-animee > *:nth-child(3) { animation-delay: 0.13s; }
+.grille-animee > *:nth-child(4) { animation-delay: 0.18s; }
+.grille-animee > *:nth-child(5) { animation-delay: 0.23s; }
+.grille-animee > *:nth-child(6) { animation-delay: 0.28s; }
+.grille-animee > *:nth-child(7) { animation-delay: 0.33s; }
+.grille-animee > *:nth-child(8) { animation-delay: 0.38s; }
+.grille-animee > *:nth-child(9) { animation-delay: 0.43s; }
+.grille-animee > *:nth-child(n + 10) { animation-delay: 0.48s; }
+
+/* Squelette de chargement */
+.squelette {
+  @apply rounded-lg bg-slate-200/70;
+  background-image: linear-gradient(90deg, transparent 0, rgba(255, 255, 255, 0.65) 40px, transparent 80px);
+  background-size: 400px 100%;
+  animation: miroitement 1.3s infinite linear;
+}
+
+/* Transitions douces sur les barres du Gantt (Chromium : x/width sont des propriétés CSS) */
+svg rect {
+  transition: fill 0.3s ease;
+}
+
+/* Barres de défilement discrètes */
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ─────────────────────────── Composants ─────────────────────────── */
+
+@layer components {
+  .carte {
+    @apply bg-white rounded-xl border border-slate-200/70;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px -6px rgba(15, 23, 42, 0.06);
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  }
+  .carte-interactive:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05), 0 14px 30px -12px rgba(37, 99, 235, 0.22);
+  }
+  .btn-primaire {
+    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed;
+    background-image: linear-gradient(to bottom, #3b82f6, #2563eb);
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.3), 0 6px 16px -6px rgba(37, 99, 235, 0.45);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  }
+  .btn-primaire:hover:not(:disabled) {
+    filter: brightness(1.07);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3), 0 10px 22px -6px rgba(37, 99, 235, 0.5);
+  }
+  .btn-primaire:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn-secondaire {
+    @apply inline-flex items-center gap-2 rounded-lg border border-primaire px-4 py-2 text-sm font-medium text-primaire disabled:opacity-50;
+    transition: all 0.2s ease;
+  }
+  .btn-secondaire:hover:not(:disabled) {
+    @apply bg-blue-50;
+    box-shadow: 0 4px 12px -4px rgba(37, 99, 235, 0.25);
+  }
+  .btn-secondaire:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn-discret {
+    @apply inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600;
+    transition: all 0.2s ease;
+  }
+  .btn-discret:hover {
+    @apply border-slate-400 bg-slate-50 text-slate-800;
+  }
+  .btn-discret:active {
+    transform: scale(0.97);
+  }
+  .btn-danger-doux {
+    @apply inline-flex items-center justify-center rounded-lg bg-red-50 p-2 text-red-600;
+    transition: all 0.2s ease;
+  }
+  .btn-danger-doux:hover {
+    @apply bg-red-100;
+    box-shadow: 0 4px 10px -4px rgba(220, 38, 38, 0.35);
+  }
+  .champ {
+    @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white disabled:bg-slate-50;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .champ:focus {
+    @apply border-primaire outline-none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+  .etiquette {
+    @apply block text-xs font-medium text-slate-600 mb-1;
+  }
+}

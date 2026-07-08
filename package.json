@@ -1,0 +1,19 @@
+{
+  "name": "sim-bat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SIM-BAT — Application de gestion d'entreprise BTP (Niger)",
+  "scripts": {
+    "dev": "concurrently -n API,WEB -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "build:render": "npm --prefix server install && npm --prefix client install && npm --prefix server run build:render && npm --prefix client run build",
+    "start:render": "npm --prefix server run start:render",
+    "start": "npm --prefix server run start",
+    "seed": "npm --prefix server run seed",
+    "reinitialiser": "npm --prefix server run reinitialiser -- --confirmer",
+    "test": "npm --prefix server run test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
