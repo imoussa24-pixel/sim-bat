@@ -58,6 +58,20 @@ npm start          # sert l'API ET le frontend compilé sur http://localhost:400
 
 Pour un accès multi-postes sur le réseau local : lancez `npm start` sur un poste « serveur » et ouvrez `http://<ip-du-poste>:4000` depuis les autres.
 
+## Déploiement sur Render (essai gratuit, accès à distance)
+
+Le dépôt contient un blueprint [render.yaml](render.yaml) : service web + PostgreSQL, tous deux sur le plan gratuit.
+
+1. Créez un dépôt GitHub **privé** et poussez le code :
+   ```bash
+   git remote add origin https://github.com/<votre-compte>/sim-bat.git
+   git push -u origin main
+   ```
+2. Sur [dashboard.render.com](https://dashboard.render.com) : **New + → Blueprint** → connectez GitHub → choisissez le dépôt → **Apply**. Render crée la base et le service, génère les secrets JWT, construit et démarre tout.
+3. Au premier démarrage, la base vide est remplie avec la démo (`admin@simbat.ne` / `admin123` — **changez-le immédiatement** puisque l'URL est publique).
+
+Limites du plan gratuit à connaître : mise en veille après 15 min d'inactivité (réveil ≈ 50 s), fichiers uploadés (photos, justificatifs) perdus à chaque redéploiement (les données restent en PostgreSQL), base gratuite expirant après 30 jours (email de Render avant échéance). En local, rien ne change : SQLite reste utilisé.
+
 ## Comptes de démonstration (mot de passe : `admin123`)
 
 | Email | Rôle |
