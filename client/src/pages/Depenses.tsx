@@ -40,20 +40,22 @@ export function Depenses() {
           <FileSpreadsheet size={15} className="text-green-600" /> Excel
         </a>
       }
+      selectionnable
       colonnes={[
-        { titre: 'Date', rendu: (d: any) => dateFr(d.date) },
-        { titre: 'Chantier', rendu: (d: any) => <span className="font-medium text-slate-800">{d.chantier?.nom ?? '—'}</span> },
+        { titre: 'Date', tri: (d: any) => new Date(d.date).getTime(), rendu: (d: any) => dateFr(d.date) },
+        { titre: 'Chantier', tri: (d: any) => d.chantier?.nom ?? '', rendu: (d: any) => <span className="font-medium text-slate-800">{d.chantier?.nom ?? '—'}</span> },
         {
           titre: 'Catégorie',
+          tri: (d: any) => d.categorie,
           rendu: (d: any) => (
             <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${COULEUR_CATEGORIE[d.categorie] ?? 'bg-slate-200 text-slate-600'}`}>
               {d.categorie}
             </span>
           ),
         },
-        { titre: 'Fournisseur', rendu: (d: any) => d.fournisseur ?? '—' },
+        { titre: 'Fournisseur', tri: (d: any) => d.fournisseur ?? '', rendu: (d: any) => d.fournisseur ?? '—' },
         { titre: 'Description', rendu: (d: any) => <span className="text-xs text-slate-500">{d.description ?? '—'}</span> },
-        { titre: 'Montant', align: 'right', rendu: (d: any) => <span className="font-semibold">{fcfa(d.montant)}</span> },
+        { titre: 'Montant', align: 'right', tri: (d: any) => d.montant, rendu: (d: any) => <span className="font-semibold">{fcfa(d.montant)}</span> },
         {
           titre: 'Justif.',
           align: 'center',

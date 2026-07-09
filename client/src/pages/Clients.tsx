@@ -117,13 +117,14 @@ export function Clients() {
         boutonCreer="Nouveau client"
         rolesEcriture={['CHEF_PROJET', 'COMPTABLE']}
         champs={CHAMPS}
+        selectionnable
         libelleSuppression={(c: any) => `Voulez-vous vraiment supprimer le client « ${c.nom} » ?`}
         colonnes={[
-          { titre: 'Nom / Raison sociale', rendu: (c: any) => <span className="font-medium text-slate-800">{c.nom}</span> },
-          { titre: 'Type', rendu: (c: any) => <Badge statut={c.type} /> },
+          { titre: 'Nom / Raison sociale', tri: (c: any) => c.nom, rendu: (c: any) => <span className="font-medium text-slate-800">{c.nom}</span> },
+          { titre: 'Type', tri: (c: any) => c.type, rendu: (c: any) => <Badge statut={c.type} /> },
           { titre: 'Téléphone', rendu: (c: any) => c.tel ?? '—' },
           { titre: 'Email', rendu: (c: any) => c.email || '—' },
-          { titre: 'Ville', rendu: (c: any) => c.ville ?? '—' },
+          { titre: 'Ville', tri: (c: any) => c.ville ?? '', rendu: (c: any) => c.ville ?? '—' },
           { titre: 'NIF', rendu: (c: any) => c.nif || '—' },
           { titre: 'Contact', rendu: (c: any) => c.contact || '—' },
         ]}

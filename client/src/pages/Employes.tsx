@@ -135,13 +135,13 @@ export function Employes() {
           ) : undefined
         }
         colonnes={[
-          { titre: 'Nom', rendu: (e: any) => <span className="font-medium text-slate-800">{e.nom}</span> },
-          { titre: 'Poste', rendu: (e: any) => e.poste },
+          { titre: 'Nom', tri: (e: any) => e.nom, rendu: (e: any) => <span className="font-medium text-slate-800">{e.nom}</span> },
+          { titre: 'Poste', tri: (e: any) => e.poste, rendu: (e: any) => e.poste },
           { titre: 'Qualification', rendu: (e: any) => e.qualification || '—' },
           { titre: 'Téléphone', rendu: (e: any) => e.tel ?? '—' },
-          { titre: 'Taux journalier', align: 'right', rendu: (e: any) => <span className="font-medium">{fcfa(e.tauxJournalier)}</span> },
-          { titre: 'Chantier', rendu: (e: any) => <span className="text-xs">{e.chantier?.nom ?? 'Non affecté'}</span> },
-          { titre: 'Statut', rendu: (e: any) => <Badge statut={e.statut} /> },
+          { titre: 'Taux journalier', align: 'right', tri: (e: any) => e.tauxJournalier, rendu: (e: any) => <span className="font-medium">{fcfa(e.tauxJournalier)}</span> },
+          { titre: 'Chantier', tri: (e: any) => e.chantier?.nom ?? '', rendu: (e: any) => <span className="text-xs">{e.chantier?.nom ?? 'Non affecté'}</span> },
+          { titre: 'Statut', tri: (e: any) => e.statut, rendu: (e: any) => <Badge statut={e.statut} /> },
         ]}
       />
       {pointageOuvert && <ModalPointage onFermer={() => setPointageOuvert(false)} />}

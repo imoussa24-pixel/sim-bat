@@ -3,10 +3,11 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   BarChart3, Building2, CalendarRange, ClipboardList, CreditCard, FileText,
   HardHat, Home, ListChecks, LogOut, Package, Receipt, ArrowLeftRight,
-  Users, Truck, Wallet, Wrench, FolderKanban, Search, Settings, Menu, X, HelpCircle,
+  Users, Truck, Wallet, Wrench, FolderKanban, Search, Settings, Menu, X, HelpCircle, Moon, Sun,
 } from 'lucide-react'
 import { useAuth } from '../auth'
 import { Chargement, cx } from '../ui'
+import { appliquerTheme, themeInitial, type Theme } from '../lib/theme'
 import { PaletteCommandes } from './PaletteCommandes'
 import { CentreAlertes } from './CentreAlertes'
 import { AideRaccourcis } from './AideRaccourcis'
@@ -60,6 +61,13 @@ export function Layout() {
   const [paletteOuverte, setPaletteOuverte] = useState(false)
   const [menuMobile, setMenuMobile] = useState(false)
   const [aideOuverte, setAideOuverte] = useState(false)
+  const [theme, setTheme] = useState<Theme>(() => themeInitial())
+
+  const basculerTheme = () => {
+    const nouveau: Theme = theme === 'sombre' ? 'clair' : 'sombre'
+    appliquerTheme(nouveau)
+    setTheme(nouveau)
+  }
 
   // Ferme le tiroir mobile à chaque navigation
   useEffect(() => {
@@ -187,6 +195,13 @@ export function Layout() {
               <div className="truncate text-[13px] font-semibold text-white">{utilisateur?.nom}</div>
               <div className="truncate text-[11px] text-slate-400">{utilisateur?.email}</div>
             </div>
+            <button
+              onClick={basculerTheme}
+              className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-amber-300"
+              title={theme === 'sombre' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            >
+              {theme === 'sombre' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <button
               onClick={() => setAideOuverte(true)}
               className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"

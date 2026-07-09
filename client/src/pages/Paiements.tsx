@@ -29,15 +29,16 @@ export function Paiements() {
       rolesEcriture={['COMPTABLE']}
       champs={CHAMPS}
       colonnes={[
-        { titre: 'Date', rendu: (p: any) => dateFr(p.date) },
-        { titre: 'Sens', rendu: (p: any) => <Badge statut={p.sens} /> },
-        { titre: 'Mode', rendu: (p: any) => <span className="text-xs capitalize">{p.mode}</span> },
-        { titre: 'Tiers', rendu: (p: any) => <span className="font-medium text-slate-800">{p.tiers ?? p.facture?.client?.nom ?? '—'}</span> },
+        { titre: 'Date', tri: (p: any) => new Date(p.date).getTime(), rendu: (p: any) => dateFr(p.date) },
+        { titre: 'Sens', tri: (p: any) => p.sens, rendu: (p: any) => <Badge statut={p.sens} /> },
+        { titre: 'Mode', tri: (p: any) => p.mode, rendu: (p: any) => <span className="text-xs capitalize">{p.mode}</span> },
+        { titre: 'Tiers', tri: (p: any) => p.tiers ?? p.facture?.client?.nom ?? '', rendu: (p: any) => <span className="font-medium text-slate-800">{p.tiers ?? p.facture?.client?.nom ?? '—'}</span> },
         { titre: 'Facture', rendu: (p: any) => <span className="font-mono text-xs">{p.facture?.numero ?? '—'}</span> },
         { titre: 'Référence', rendu: (p: any) => <span className="text-xs text-slate-500">{p.reference ?? '—'}</span> },
         {
           titre: 'Montant',
           align: 'right',
+          tri: (p: any) => p.montant,
           rendu: (p: any) => (
             <span className={`font-semibold ${p.sens === 'encaissement' ? 'text-green-600' : 'text-orange-600'}`}>
               {p.sens === 'encaissement' ? '+' : '−'} {fcfa(p.montant)}

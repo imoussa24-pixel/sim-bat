@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Loader2, Pencil, Plus, Trash2, Paperclip } from 'lucide-react'
+import { Loader2, Pencil, Plus, Trash2, Paperclip, X } from 'lucide-react'
 import { get, post, put, supprimer } from '../lib/api'
 import { useAuth } from '../auth'
 import { Champ, Chargement, ConfirmSuppression, EnTetePage, EtatVide, Modal, Recherche, Tableau, useToast, type Colonne } from '../ui'
@@ -226,6 +226,8 @@ export function PageCrud<T extends { id: string }>({
   enTeteSupplement,
   large,
   libelleSuppression,
+  selectionnable,
+  actionsGroupees,
 }: {
   titre: string
   sousTitre?: string
@@ -239,6 +241,10 @@ export function PageCrud<T extends { id: string }>({
   enTeteSupplement?: React.ReactNode
   large?: boolean
   libelleSuppression?: (ligne: T) => string
+  /** Active la sélection multi-lignes et la barre d'actions groupées. */
+  selectionnable?: boolean
+  /** Actions groupées personnalisées, à droite de la suppression groupée. */
+  actionsGroupees?: (ids: string[], recharger: () => Promise<void>, effacer: () => void) => React.ReactNode
 }) {
   const { lignes, chargement, q, setQ, recharger } = usePageCrud<T>(ressource)
   const { peutEcrire } = useAuth()
@@ -246,7 +252,20 @@ export function PageCrud<T extends { id: string }>({
   const [modalOuvert, setModalOuvert] = useState(false)
   const [edition, setEdition] = useState<T | null>(null)
   const [suppression, setSuppression] = useState<T | null>(null)
+  const [selection, setSelection] = useState<Set<string>>(new Set())
+  const [suppGroupee, setSuppGroupee] = useState(false)
   const ecriture = peutEcrire(rolesEcriture)
+  const selectionActive = !!selectionnable && ecriture
+  const effacerSelection = () => setSelection(new Set())
+
+  // Retire de la sélection les lignes disparues après un rechargement
+  useEffect(() => {
+    setSelection((s) => {
+      const ids = new Set(lignes.map((l) => l.id))
+      const n = new Set([...s].filter((id) => ids.has(id)))
+      return n.size === s.size ? s : n
+    })
+  }, [lignes])
 
   const colonnesAvecActions = useMemo<Colonne<T>[]>(() => {
     const base = [...colonnes]
@@ -330,8 +349,57 @@ export function PageCrud<T extends { id: string }>({
           }
         />
       ) : (
-        <Tableau colonnes={colonnesAvecActions} lignes={lignes} vide={q ? `Aucun résultat pour « ${q} ».` : undefined} />
+        <Tableau
+          colonnes={colonnesAvecActions}
+          lignes={lignes}
+          vide={q ? `Aucun résultat pour « ${q} ».` : undefined}
+          selection={selectionActive ? selection : undefined}
+          onSelection={selectionActive ? setSelection : undefined}
+        />
       )}
+
+      {/* Barre d'actions groupées */}
+      {selectionActive && selection.size > 0 && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 flex justify-center px-4">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-2.5 shadow-flottant backdrop-blur [animation:surgir_0.2s_ease-out]">
+            <span className="text-sm font-semibold text-slate-700">
+              {selection.size} sélectionné{selection.size > 1 ? 's' : ''}
+            </span>
+            <span className="h-5 w-px bg-slate-200" />
+            {actionsGroupees?.([...selection], recharger, effacerSelection)}
+            <button
+              className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
+              onClick={() => setSuppGroupee(true)}
+            >
+              <Trash2 size={14} /> Supprimer
+            </button>
+            <button className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600" onClick={effacerSelection} title="Annuler la sélection">
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <ConfirmSuppression
+        ouvert={suppGroupee}
+        onFermer={() => setSuppGroupee(false)}
+        message={`Voulez-vous vraiment supprimer les ${selection.size} éléments sélectionnés ?`}
+        onConfirmer={async () => {
+          const ids = [...selection]
+          let ok = 0
+          for (const id of ids) {
+            try {
+              await supprimer(`/api/${ressource}/${id}`)
+              ok++
+            } catch {
+              /* on continue */
+            }
+          }
+          notifier(ok === ids.length ? 'succes' : 'erreur', `${ok}/${ids.length} élément(s) supprimé(s).`)
+          effacerSelection()
+          await recharger()
+        }}
+      />
 
       <FormulaireModal
         titre={edition ? `Modifier — ${titre}` : (boutonCreer ?? 'Nouveau')}

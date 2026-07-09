@@ -7,7 +7,11 @@ import '@fontsource-variable/inter'
 import App from './App'
 import { FournisseurAuth } from './auth'
 import { FournisseurToasts } from './ui'
+import { appliquerTheme, themeInitial } from './lib/theme'
 import './index.css'
+
+// Applique le thème avant le rendu (évite le flash clair→sombre)
+appliquerTheme(themeInitial())
 
 /** Garde-fou : évite l'écran blanc en cas d'erreur d'exécution imprévue. */
 class BarriereErreur extends React.Component<{ children: React.ReactNode }, { erreur: Error | null }> {

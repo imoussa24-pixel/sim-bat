@@ -214,3 +214,130 @@ svg rect {
     box-shadow: var(--ombre-focus);
   }
 }
+
+/* ─────────────────────────────── Mode sombre ─────────────────────────────── */
+/* Surcharges à spécificité (0,2,0) : « .dark .xxx » l'emporte sur les
+   utilitaires Tailwind « .xxx » (0,1,0) — thème global sans éditer les pages. */
+
+.dark body {
+  background-color: #0e1420;
+  color: #cbd5e1;
+}
+.dark .bg-fond {
+  background-color: #0e1420;
+}
+
+/* Surfaces */
+.dark .carte {
+  background-color: #161d2c;
+  border-color: rgba(148, 163, 184, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.dark .carte-interactive:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.6);
+}
+.dark .bg-white {
+  background-color: #161d2c;
+}
+.dark .bg-slate-50,
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/60,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50\/40 {
+  background-color: rgba(148, 163, 184, 0.06);
+}
+.dark .bg-slate-100 {
+  background-color: rgba(148, 163, 184, 0.1);
+}
+.dark .bg-slate-200 {
+  background-color: rgba(148, 163, 184, 0.16);
+}
+
+/* Textes */
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #e6eaf1;
+}
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #9aa6b8;
+}
+.dark .text-slate-400 {
+  color: #77869c;
+}
+.dark .text-slate-300 {
+  color: #5e6d85;
+}
+
+/* Bordures & séparateurs */
+.dark .border-slate-50,
+.dark .border-slate-100,
+.dark .border-slate-200 {
+  border-color: rgba(148, 163, 184, 0.14);
+}
+.dark .divide-slate-50 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(148, 163, 184, 0.1);
+}
+
+/* Survols de lignes / éléments */
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-50\/60:hover,
+.dark .hover\:bg-slate-50\/40:hover,
+.dark .hover\:bg-primaire-50\/40:hover,
+.dark .hover\:bg-primaire-50\/30:hover {
+  background-color: rgba(148, 163, 184, 0.07);
+}
+
+/* Champs de formulaire */
+.dark .champ {
+  background-color: #0e1420;
+  border-color: rgba(148, 163, 184, 0.18);
+  color: #e6eaf1;
+}
+.dark .champ:disabled {
+  background-color: rgba(148, 163, 184, 0.05);
+}
+.dark select.champ option {
+  background-color: #161d2c;
+  color: #e6eaf1;
+}
+
+/* Boutons secondaires / discrets */
+.dark .btn-secondaire,
+.dark .btn-discret {
+  background-color: #1b2334;
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #cbd5e1;
+}
+.dark .btn-discret:hover {
+  background-color: rgba(148, 163, 184, 0.08);
+  color: #e6eaf1;
+}
+
+/* Modales & panneaux latéraux qui utilisent bg-white en dur */
+.dark .bg-white\/95 {
+  background-color: rgba(22, 29, 44, 0.96);
+}
+
+/* Graphiques Recharts */
+.dark .recharts-cartesian-grid line {
+  stroke: rgba(148, 163, 184, 0.14);
+}
+.dark .recharts-text {
+  fill: #9aa6b8;
+}
+.dark .recharts-cartesian-axis-line,
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: rgba(148, 163, 184, 0.2);
+}
+
+/* Barre de défilement sombre */
+.dark ::-webkit-scrollbar-thumb {
+  background: #374357;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

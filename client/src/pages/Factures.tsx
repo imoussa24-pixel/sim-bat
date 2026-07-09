@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { FileText, HandCoins, Loader2, Wand2 } from 'lucide-react'
-import { get, post, urlExport } from '../lib/api'
+import { FileText, HandCoins, Loader2, Send, Wand2 } from 'lucide-react'
+import { get, post, put, urlExport } from '../lib/api'
 import { fcfa, dateFr, dateIso } from '../lib/format'
 import { MODES_PAIEMENT } from '../lib/statuts'
 import { useAuth } from '../auth'
@@ -167,6 +167,7 @@ function ModalSituationAuto({ onFermer, onCree }: { onFermer: () => void; onCree
 
 export function Factures() {
   const { peutEcrire } = useAuth()
+  const { notifier } = useToast()
   const [encaissement, setEncaissement] = useState<{ facture: any; recharger: () => Promise<void> } | null>(null)
   const [situationOuverte, setSituationOuverte] = useState(false)
   const [cleRechargement, setCleRechargement] = useState(0)
@@ -182,6 +183,28 @@ export function Factures() {
         rolesEcriture={['COMPTABLE']}
         champs={CHAMPS}
         large
+        selectionnable
+        actionsGroupees={(ids, recharger, effacer) => (
+          <button
+            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-primaire transition-colors hover:bg-blue-100"
+            onClick={async () => {
+              let ok = 0
+              for (const id of ids) {
+                try {
+                  await put(`/api/factures/${id}`, { statut: 'envoyée' })
+                  ok++
+                } catch {
+                  /* ignore */
+                }
+              }
+              notifier('succes', `${ok} facture(s) marquée(s) envoyée(s).`)
+              effacer()
+              await recharger()
+            }}
+          >
+            <Send size={14} /> Marquer envoyée
+          </button>
+        )}
         enTeteSupplement={
           peutEcrire(['COMPTABLE', 'CHEF_PROJET']) ? (
             <button className="btn-secondaire" onClick={() => setSituationOuverte(true)} title="Générer une facture de situation depuis l'avancement réel">
@@ -190,20 +213,22 @@ export function Factures() {
           ) : undefined
         }
         colonnes={[
-          { titre: 'Numéro', rendu: (f: any) => <span className="font-mono text-xs font-semibold">{f.numero}</span> },
-          { titre: 'Client', rendu: (f: any) => <span className="text-xs">{f.client?.nom ?? '—'}</span> },
-          { titre: 'Type', rendu: (f: any) => <Badge statut={f.type} /> },
-          { titre: 'Date', rendu: (f: any) => dateFr(f.date) },
+          { titre: 'Numéro', tri: (f: any) => f.numero, rendu: (f: any) => <span className="font-mono text-xs font-semibold">{f.numero}</span> },
+          { titre: 'Client', tri: (f: any) => f.client?.nom ?? '', rendu: (f: any) => <span className="text-xs">{f.client?.nom ?? '—'}</span> },
+          { titre: 'Type', tri: (f: any) => f.type, rendu: (f: any) => <Badge statut={f.type} /> },
+          { titre: 'Date', tri: (f: any) => new Date(f.date).getTime(), rendu: (f: any) => dateFr(f.date) },
           {
             titre: 'Échéance',
+            tri: (f: any) => (f.echeance ? new Date(f.echeance).getTime() : 0),
             rendu: (f: any) => (
               <span className={cx('text-xs', f.statut === 'en retard' && 'font-semibold text-red-600')}>{dateFr(f.echeance)}</span>
             ),
           },
-          { titre: 'Montant', align: 'right', rendu: (f: any) => <span className="font-semibold">{fcfa(f.montant)}</span> },
+          { titre: 'Montant', align: 'right', tri: (f: any) => f.montant, rendu: (f: any) => <span className="font-semibold">{fcfa(f.montant)}</span> },
           {
             titre: 'Payé / Reste',
             align: 'right',
+            tri: (f: any) => f.resteAPayer,
             rendu: (f: any) => (
               <div className="text-right text-xs">
                 <div className="text-green-600">{fcfa(f.totalPaye)}</div>
@@ -212,7 +237,7 @@ export function Factures() {
             ),
           },
           { titre: 'Retenue', align: 'center', rendu: (f: any) => (f.retenueGarantie ? `${f.retenueGarantie} %` : '—') },
-          { titre: 'Statut', rendu: (f: any) => <Badge statut={f.statut} /> },
+          { titre: 'Statut', tri: (f: any) => f.statut, rendu: (f: any) => <Badge statut={f.statut} /> },
         ]}
         actionsSupplementaires={(f: any, recharger) => (
           <>

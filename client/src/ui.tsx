@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { AlertTriangle, CheckCircle2, Inbox, Loader2, Search, X } from 'lucide-react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, ArrowDown, ArrowUp, ChevronsUpDown, CheckCircle2, Inbox, Loader2, Search, X } from 'lucide-react'
 import { COULEURS_STATUT, couleurProgression } from './lib/statuts'
 
 export function cx(...classes: (string | false | null | undefined)[]) {
@@ -257,6 +257,8 @@ export interface Colonne<T> {
   rendu: (ligne: T) => React.ReactNode
   align?: 'left' | 'right' | 'center'
   largeur?: string
+  /** Fournir une valeur de tri rend l'en-tête cliquable pour trier sur cette colonne. */
+  tri?: (ligne: T) => string | number | null | undefined
 }
 
 export function Tableau<T extends { id: string }>({
@@ -264,28 +266,88 @@ export function Tableau<T extends { id: string }>({
   lignes,
   vide,
   surClic,
+  selection,
+  onSelection,
 }: {
   colonnes: Colonne<T>[]
   lignes: T[]
   vide?: string
   surClic?: (ligne: T) => void
+  /** Ensemble d'identifiants sélectionnés (active la colonne de cases à cocher). */
+  selection?: Set<string>
+  onSelection?: (nouvelle: Set<string>) => void
 }) {
+  const [triCol, setTriCol] = useState<number | null>(null)
+  const [triDesc, setTriDesc] = useState(false)
+
+  const lignesTriees = useMemo(() => {
+    if (triCol == null || !colonnes[triCol]?.tri) return lignes
+    const val = colonnes[triCol].tri!
+    return [...lignes].sort((a, b) => {
+      const va = val(a) ?? '',
+        vb = val(b) ?? ''
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * (triDesc ? -1 : 1)
+      return String(va).localeCompare(String(vb), 'fr', { numeric: true }) * (triDesc ? -1 : 1)
+    })
+  }, [lignes, triCol, triDesc, colonnes])
+
+  const cliquerTri = (i: number) => {
+    if (!colonnes[i].tri) return
+    if (triCol === i) setTriDesc((d) => !d)
+    else {
+      setTriCol(i)
+      setTriDesc(false)
+    }
+  }
+
+  const selectionnable = !!selection && !!onSelection
+  const idsVisibles = lignesTriees.map((l) => l.id)
+  const toutSelectionne = selectionnable && idsVisibles.length > 0 && idsVisibles.every((id) => selection!.has(id))
+
   return (
     <div className="carte overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-100 bg-slate-50/60 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-500">
+            {selectionnable && (
+              <th className="w-10 px-4 py-3">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 cursor-pointer rounded border-slate-300 text-primaire focus:ring-blue-200"
+                  checked={toutSelectionne}
+                  onChange={() => {
+                    const n = new Set(selection!)
+                    if (toutSelectionne) idsVisibles.forEach((id) => n.delete(id))
+                    else idsVisibles.forEach((id) => n.add(id))
+                    onSelection!(n)
+                  }}
+                />
+              </th>
+            )}
             {colonnes.map((c, i) => (
-              <th key={i} className={cx('px-4 py-3', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center')} style={c.largeur ? { width: c.largeur } : undefined}>
-                {c.titre}
+              <th
+                key={i}
+                className={cx('px-4 py-3 select-none', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center', c.tri && 'cursor-pointer transition-colors hover:text-slate-700')}
+                style={c.largeur ? { width: c.largeur } : undefined}
+                onClick={() => cliquerTri(i)}
+              >
+                <span className={cx('inline-flex items-center gap-1', c.align === 'right' && 'flex-row-reverse')}>
+                  {c.titre}
+                  {c.tri &&
+                    (triCol === i ? (
+                      triDesc ? <ArrowDown size={12} className="text-primaire" /> : <ArrowUp size={12} className="text-primaire" />
+                    ) : (
+                      <ChevronsUpDown size={12} className="opacity-30" />
+                    ))}
+                </span>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {lignes.length === 0 && (
+          {lignesTriees.length === 0 && (
             <tr>
-              <td colSpan={colonnes.length} className="px-4 py-12 text-center">
+              <td colSpan={colonnes.length + (selectionnable ? 1 : 0)} className="px-4 py-12 text-center">
                 <div className="flex flex-col items-center gap-2 text-slate-400">
                   <Inbox size={26} className="text-slate-300" />
                   <span className="text-sm">{vide ?? 'Aucun élément à afficher.'}</span>
@@ -293,19 +355,40 @@ export function Tableau<T extends { id: string }>({
               </td>
             </tr>
           )}
-          {lignes.map((l) => (
-            <tr
-              key={l.id}
-              className={cx('border-b border-slate-50 last:border-0 transition-colors hover:bg-primaire-50/40', surClic && 'cursor-pointer')}
-              onClick={surClic ? () => surClic(l) : undefined}
-            >
-              {colonnes.map((c, i) => (
-                <td key={i} className={cx('px-4 py-3 align-middle', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center')}>
-                  {c.rendu(l)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {lignesTriees.map((l) => {
+            const coche = selectionnable && selection!.has(l.id)
+            return (
+              <tr
+                key={l.id}
+                className={cx(
+                  'border-b border-slate-50 last:border-0 transition-colors',
+                  coche ? 'bg-primaire-50/60' : 'hover:bg-primaire-50/40',
+                  surClic && 'cursor-pointer'
+                )}
+                onClick={surClic ? () => surClic(l) : undefined}
+              >
+                {selectionnable && (
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 cursor-pointer rounded border-slate-300 text-primaire focus:ring-blue-200"
+                      checked={coche}
+                      onChange={() => {
+                        const n = new Set(selection!)
+                        n.has(l.id) ? n.delete(l.id) : n.add(l.id)
+                        onSelection!(n)
+                      }}
+                    />
+                  </td>
+                )}
+                {colonnes.map((c, i) => (
+                  <td key={i} className={cx('px-4 py-3 align-middle', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center')}>
+                    {c.rendu(l)}
+                  </td>
+                ))}
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

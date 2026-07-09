@@ -72,13 +72,14 @@ export function Devis() {
               </Link>
             ),
           },
-          { titre: 'Objet', rendu: (d: any) => <span className="text-slate-800">{d.objet ?? '—'}</span> },
-          { titre: 'Client', rendu: (d: any) => <span className="text-xs">{d.client?.nom ?? '—'}</span> },
-          { titre: 'Date', rendu: (d: any) => dateFr(d.date) },
-          { titre: 'Total HT', align: 'right', rendu: (d: any) => fcfa(d.totalHT) },
-          { titre: 'Total TTC', align: 'right', rendu: (d: any) => <span className="font-semibold">{fcfa(d.totalTTC)}</span> },
+          { titre: 'Objet', tri: (d: any) => d.objet ?? '', rendu: (d: any) => <span className="text-slate-800">{d.objet ?? '—'}</span> },
+          { titre: 'Client', tri: (d: any) => d.client?.nom ?? '', rendu: (d: any) => <span className="text-xs">{d.client?.nom ?? '—'}</span> },
+          { titre: 'Date', tri: (d: any) => new Date(d.date).getTime(), rendu: (d: any) => dateFr(d.date) },
+          { titre: 'Total HT', align: 'right', tri: (d: any) => d.totalHT, rendu: (d: any) => fcfa(d.totalHT) },
+          { titre: 'Total TTC', align: 'right', tri: (d: any) => d.totalTTC, rendu: (d: any) => <span className="font-semibold">{fcfa(d.totalTTC)}</span> },
           {
             titre: 'Statut',
+            tri: (d: any) => d.statut,
             rendu: (d: any) => (
               <div className="flex items-center gap-1.5">
                 <Badge statut={d.statut} />
