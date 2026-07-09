@@ -3,12 +3,13 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   BarChart3, Building2, CalendarRange, ClipboardList, CreditCard, FileText,
   HardHat, Home, ListChecks, LogOut, Package, Receipt, ArrowLeftRight,
-  Users, Truck, Wallet, Wrench, FolderKanban, Search, Settings, Menu, X,
+  Users, Truck, Wallet, Wrench, FolderKanban, Search, Settings, Menu, X, HelpCircle,
 } from 'lucide-react'
 import { useAuth } from '../auth'
 import { Chargement, cx } from '../ui'
 import { PaletteCommandes } from './PaletteCommandes'
 import { CentreAlertes } from './CentreAlertes'
+import { AideRaccourcis } from './AideRaccourcis'
 
 interface Item {
   vers: string
@@ -58,6 +59,7 @@ export function Layout() {
   const location = useLocation()
   const [paletteOuverte, setPaletteOuverte] = useState(false)
   const [menuMobile, setMenuMobile] = useState(false)
+  const [aideOuverte, setAideOuverte] = useState(false)
 
   // Ferme le tiroir mobile à chaque navigation
   useEffect(() => {
@@ -70,12 +72,17 @@ export function Layout() {
     .join('')
     .toUpperCase()
 
-  // Raccourci global Ctrl+K / Cmd+K
+  // Raccourcis globaux : Ctrl/Cmd+K (recherche) et ? (aide)
   useEffect(() => {
     const clavier = (e: KeyboardEvent) => {
+      const cible = e.target as HTMLElement
+      const dansChamp = /^(INPUT|TEXTAREA|SELECT)$/.test(cible?.tagName) || cible?.isContentEditable
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         setPaletteOuverte((o) => !o)
+      } else if (e.key === '?' && !dansChamp) {
+        e.preventDefault()
+        setAideOuverte((o) => !o)
       }
     }
     window.addEventListener('keydown', clavier)
@@ -177,13 +184,20 @@ export function Layout() {
               {initiales}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[13px] font-medium text-white">{utilisateur?.nom}</div>
+              <div className="truncate text-[13px] font-semibold text-white">{utilisateur?.nom}</div>
               <div className="truncate text-[11px] text-slate-400">{utilisateur?.email}</div>
             </div>
+            <button
+              onClick={() => setAideOuverte(true)}
+              className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+              title="Aide & raccourcis clavier (?)"
+            >
+              <HelpCircle size={16} />
+            </button>
           </div>
           <button
             onClick={deconnecter}
-            className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5 hover:text-white"
+            className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-1.5 text-xs text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
           >
             <LogOut size={13} />
             Déconnexion
@@ -200,6 +214,7 @@ export function Layout() {
       </main>
 
       <PaletteCommandes ouverte={paletteOuverte} onFermer={() => setPaletteOuverte(false)} />
+      <AideRaccourcis ouvert={aideOuverte} onFermer={() => setAideOuverte(false)} />
     </div>
   )
 }

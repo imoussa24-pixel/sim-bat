@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Loader2, Pencil, Plus, Trash2, Paperclip } from 'lucide-react'
 import { get, post, put, supprimer } from '../lib/api'
 import { useAuth } from '../auth'
-import { Champ, Chargement, ConfirmSuppression, EnTetePage, Modal, Recherche, Tableau, useToast, type Colonne } from '../ui'
+import { Champ, Chargement, ConfirmSuppression, EnTetePage, EtatVide, Modal, Recherche, Tableau, useToast, type Colonne } from '../ui'
 
 export type TypeChampForm = 'texte' | 'nombre' | 'date' | 'select' | 'textarea' | 'case' | 'fichier'
 
@@ -304,7 +304,34 @@ export function PageCrud<T extends { id: string }>({
           </>
         }
       />
-      {chargement ? <Chargement /> : <Tableau colonnes={colonnesAvecActions} lignes={lignes} />}
+      {chargement ? (
+        <Chargement />
+      ) : lignes.length === 0 && !q ? (
+        <EtatVide
+          titre={`Aucun élément pour « ${titre} »`}
+          description={
+            ecriture
+              ? `Commencez par créer votre premier élément — cela ne prend qu'un instant.`
+              : `La liste est vide pour le moment.`
+          }
+          action={
+            ecriture ? (
+              <button
+                className="btn-primaire"
+                onClick={() => {
+                  setEdition(null)
+                  setModalOuvert(true)
+                }}
+              >
+                <Plus size={16} />
+                {boutonCreer ?? 'Nouveau'}
+              </button>
+            ) : undefined
+          }
+        />
+      ) : (
+        <Tableau colonnes={colonnesAvecActions} lignes={lignes} vide={q ? `Aucun résultat pour « ${q} ».` : undefined} />
+      )}
 
       <FormulaireModal
         titre={edition ? `Modifier — ${titre}` : (boutonCreer ?? 'Nouveau')}

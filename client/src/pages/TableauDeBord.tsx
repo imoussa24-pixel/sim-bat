@@ -6,7 +6,9 @@ import {
 import { FileSignature, HardHat, FolderKanban, RefreshCw, Users } from 'lucide-react'
 import { get } from '../lib/api'
 import { fcfa, fcfaCompact } from '../lib/format'
+import { useAuth } from '../auth'
 import { CarteKpi, Chargement, EnTetePage, useToast } from '../ui'
+import { BanniereBienvenue } from '../components/BanniereBienvenue'
 
 const COULEURS_DONUT: Record<string, string> = {
   'En attente': '#475569',
@@ -18,6 +20,7 @@ export function TableauDeBord() {
   const [donnees, setDonnees] = useState<any>(null)
   const [chargement, setChargement] = useState(true)
   const { notifier } = useToast()
+  const { utilisateur } = useAuth()
 
   const charger = async () => {
     setChargement(true)
@@ -52,6 +55,8 @@ export function TableauDeBord() {
         }
       />
 
+      <BanniereBienvenue compteurs={compteurs} nomUtilisateur={utilisateur?.nom} />
+
       {/* Cartes KPI */}
       <div className="grille-animee grid grid-cols-2 gap-4 xl:grid-cols-4">
         <CarteKpi titre="Contrats" valeur={compteurs.contrats} icone={<FileSignature size={20} />} couleur="bg-indigo-50 text-indigo-600" />
@@ -60,7 +65,7 @@ export function TableauDeBord() {
         <CarteKpi titre="Clients" valeur={compteurs.clients} icone={<Users size={20} />} couleur="bg-green-50 text-green-600" />
       </div>
 
-      <h2 className="mb-3 mt-7 text-base font-semibold text-slate-700">Analyses</h2>
+      <h2 className="mb-4 mt-8 text-lg font-bold tracking-tight2 text-slate-800">Analyses</h2>
       <div className="grille-animee grid grid-cols-1 gap-4 xl:grid-cols-2">
         {/* CA par mois */}
         <div className="carte p-4">

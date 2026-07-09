@@ -96,9 +96,9 @@ export function PageConnexion() {
             <div className="text-xs text-slate-400">SIM-BAT — Gestion d'entreprise BTP</div>
           </div>
         </div>
-        <form onSubmit={soumettre} className="carte border-white/40 bg-white/95 p-6 !shadow-2xl backdrop-blur-xl">
-          <h1 className="mb-1 text-lg font-semibold text-slate-800">Connexion</h1>
-          <p className="mb-4 text-sm text-slate-500">Accédez à votre espace de gestion.</p>
+        <form onSubmit={soumettre} className="carte border-white/40 bg-white/95 p-7 !shadow-2xl backdrop-blur-xl">
+          <h1 className="mb-1 text-xl font-extrabold tracking-tight2 text-slate-900">Connexion</h1>
+          <p className="mb-5 text-sm text-slate-500">Accédez à votre espace de gestion.</p>
           {erreur && <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{erreur}</div>}
           <label className="etiquette">Email</label>
           <input className="champ mb-3" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus required />

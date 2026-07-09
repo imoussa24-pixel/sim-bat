@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { AlertTriangle, CheckCircle2, Loader2, Search, X } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Inbox, Loader2, Search, X } from 'lucide-react'
 import { COULEURS_STATUT, couleurProgression } from './lib/statuts'
 
 export function cx(...classes: (string | false | null | undefined)[]) {
@@ -12,8 +12,8 @@ export function Badge({ statut, className }: { statut: string; className?: strin
   return (
     <span
       className={cx(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
-        COULEURS_STATUT[statut] ?? 'bg-slate-200 text-slate-600',
+        'pilule ring-1 ring-inset ring-black/[0.04]',
+        COULEURS_STATUT[statut] ?? 'bg-slate-100 text-slate-600',
         className
       )}
     >
@@ -96,17 +96,17 @@ export function Modal({
       onMouseDown={onFermer}
     >
       <div
-        className={cx('carte w-full p-0 shadow-2xl [animation:surgir_0.28s_cubic-bezier(0.22,1,0.36,1)]', large ? 'max-w-3xl' : 'max-w-lg')}
+        className={cx('carte w-full p-0 shadow-flottant [animation:surgir_0.28s_cubic-bezier(0.22,1,0.36,1)]', large ? 'max-w-3xl' : 'max-w-lg')}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-          <h3 className="text-base font-semibold text-slate-800">{titre}</h3>
-          <button onClick={onFermer} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
+          <h3 className="text-[15px] font-bold text-slate-800">{titre}</h3>
+          <button onClick={onFermer} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
             <X size={18} />
           </button>
         </div>
         <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{children}</div>
-        {pied && <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-3">{pied}</div>}
+        {pied && <div className="flex justify-end gap-2 border-t border-slate-100 px-5 py-3">{pied}</div>}
       </div>
     </div>
   )
@@ -142,7 +142,7 @@ export function ConfirmSuppression({
           Annuler
         </button>
         <button
-          className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 disabled:opacity-50"
           disabled={enCours}
           onClick={async () => {
             setEnCours(true)
@@ -227,10 +227,10 @@ export function OngletsPilules({
           key={o.valeur}
           onClick={() => onChange(o.valeur)}
           className={cx(
-            'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors border',
+            'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all',
             actif === o.valeur
-              ? 'bg-primaire text-white border-primaire'
-              : 'bg-white text-slate-600 border-slate-200 hover:border-primaire hover:text-primaire'
+              ? 'border-primaire bg-primaire text-white shadow-bouton'
+              : 'border-slate-200 bg-white text-slate-600 hover:border-primaire/50 hover:text-primaire'
           )}
         >
           {o.label}
@@ -274,9 +274,9 @@ export function Tableau<T extends { id: string }>({
     <div className="carte overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 bg-slate-50/70 text-left text-xs uppercase tracking-wide text-slate-500">
+          <tr className="border-b border-slate-100 bg-slate-50/60 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-500">
             {colonnes.map((c, i) => (
-              <th key={i} className={cx('px-4 py-3 font-medium', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center')} style={c.largeur ? { width: c.largeur } : undefined}>
+              <th key={i} className={cx('px-4 py-3', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center')} style={c.largeur ? { width: c.largeur } : undefined}>
                 {c.titre}
               </th>
             ))}
@@ -285,19 +285,22 @@ export function Tableau<T extends { id: string }>({
         <tbody>
           {lignes.length === 0 && (
             <tr>
-              <td colSpan={colonnes.length} className="px-4 py-10 text-center text-sm text-slate-400">
-                {vide ?? 'Aucun élément à afficher.'}
+              <td colSpan={colonnes.length} className="px-4 py-12 text-center">
+                <div className="flex flex-col items-center gap-2 text-slate-400">
+                  <Inbox size={26} className="text-slate-300" />
+                  <span className="text-sm">{vide ?? 'Aucun élément à afficher.'}</span>
+                </div>
               </td>
             </tr>
           )}
           {lignes.map((l) => (
             <tr
               key={l.id}
-              className={cx('border-b border-slate-100 last:border-0 hover:bg-slate-50/60', surClic && 'cursor-pointer')}
+              className={cx('border-b border-slate-50 last:border-0 transition-colors hover:bg-primaire-50/40', surClic && 'cursor-pointer')}
               onClick={surClic ? () => surClic(l) : undefined}
             >
               {colonnes.map((c, i) => (
-                <td key={i} className={cx('px-4 py-2.5 align-middle', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center')}>
+                <td key={i} className={cx('px-4 py-3 align-middle', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center')}>
                   {c.rendu(l)}
                 </td>
               ))}
@@ -305,6 +308,34 @@ export function Tableau<T extends { id: string }>({
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+// ─────────────────────────────── État vide ──────────────────────────────────
+
+/** État vide guidé : icône + message + action, pour orienter l'utilisateur. */
+export function EtatVide({
+  icone,
+  titre,
+  description,
+  action,
+}: {
+  icone?: React.ReactNode
+  titre: string
+  description?: React.ReactNode
+  action?: React.ReactNode
+}) {
+  return (
+    <div className="carte flex flex-col items-center gap-3 px-6 py-14 text-center [animation:apparition_0.4s_ease-out]">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 text-primaire ring-1 ring-inset ring-blue-100">
+        {icone ?? <Inbox size={26} />}
+      </div>
+      <div>
+        <h3 className="text-base font-bold text-slate-800">{titre}</h3>
+        {description && <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">{description}</p>}
+      </div>
+      {action && <div className="mt-1">{action}</div>}
     </div>
   )
 }
@@ -337,7 +368,7 @@ export function CarteKpi({
       {icone && (
         <div
           className={cx(
-            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-inner',
+            'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1 ring-inset ring-black/[0.03]',
             couleur ?? 'bg-blue-50 text-primaire'
           )}
         >
@@ -347,13 +378,13 @@ export function CarteKpi({
       <div className="min-w-0 flex-1">
         <div className="text-xs font-medium text-slate-500">{titre}</div>
         <div className="flex items-baseline gap-2">
-          <div className="truncate text-xl font-bold text-slate-800">
+          <div className="tabnum truncate text-2xl font-extrabold tracking-tight2 text-slate-800">
             {typeof valeur === 'number' ? <ValeurCompteur valeur={valeur} /> : valeur}
           </div>
           {tendance != null && isFinite(tendance) && (
             <span
               className={cx(
-                'inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold',
+                'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold',
                 tendance >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
               )}
             >
@@ -361,7 +392,7 @@ export function CarteKpi({
             </span>
           )}
         </div>
-        {sous && <div className="text-xs text-slate-400">{sous}</div>}
+        {sous && <div className="mt-0.5 text-xs text-slate-400">{sous}</div>}
       </div>
     </div>
   )
@@ -454,12 +485,12 @@ export function EnTetePage({
   actions?: React.ReactNode
 }) {
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 className="text-xl font-bold text-slate-800">{titre}</h1>
-        {sousTitre && <p className="mt-0.5 text-sm text-slate-500">{sousTitre}</p>}
+        <h1 className="text-[1.65rem] font-extrabold tracking-tight2 text-slate-900">{titre}</h1>
+        {sousTitre && <p className="mt-1 text-sm text-slate-500">{sousTitre}</p>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
   )
 }
