@@ -155,7 +155,7 @@ SIM-BAT/
 │       └── entites.ts # registre des 20 entités
 └── client/            # React + Vite + Tailwind
     └── src/
-        ├── components/  # Layout (sidebar BatiFlow), PageCrud générique, Gantt SVG
+        ├── components/  # Layout (sidebar SIM-HANDLING), PageCrud générique, Gantt SVG
         └── pages/       # 18 pages métier
 ```
 

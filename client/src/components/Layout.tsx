@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  BarChart3, Building2, CalendarRange, ClipboardList, CreditCard, FileText,
+  BarChart3, CalendarRange, ClipboardList, CreditCard, FileText,
   HardHat, Home, ListChecks, LogOut, Package, Receipt, ArrowLeftRight,
   Users, Truck, Wallet, Wrench, FolderKanban, Search, Settings, Menu, X, HelpCircle, Moon, Sun,
 } from 'lucide-react'
@@ -11,6 +11,7 @@ import { appliquerTheme, themeInitial, type Theme } from '../lib/theme'
 import { PaletteCommandes } from './PaletteCommandes'
 import { CentreAlertes } from './CentreAlertes'
 import { AideRaccourcis } from './AideRaccourcis'
+import { LogoLockup } from './Logo'
 
 interface Item {
   vers: string
@@ -116,16 +117,8 @@ export function Layout() {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2.5 border-b border-white/5 px-4 py-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-900/50">
-            <Building2 size={20} />
-          </div>
-          <div>
-            <div className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-base font-bold leading-none text-transparent">
-              BatiFlow
-            </div>
-            <div className="mt-0.5 text-[10px] text-slate-400">SIM-BAT · Gestion BTP</div>
-          </div>
+        <div className="border-b border-white/5 px-4 py-4">
+          <LogoLockup sombreFond compact />
         </div>
 
         {/* Recherche globale + alertes */}

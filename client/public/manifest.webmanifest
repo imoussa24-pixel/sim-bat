@@ -1,11 +1,11 @@
 {
-  "name": "SIM-BAT — Gestion BTP",
-  "short_name": "SIM-BAT",
-  "description": "Gestion d'entreprise BTP : chantiers, planification CPM, finance, ressources.",
+  "name": "SIM-HANDLING Corporation",
+  "short_name": "SIM-HANDLING",
+  "description": "SIM-HANDLING Corporation — gestion d'entreprise : projets, chantiers, planification, finance, ressources.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1e2430",
-  "theme_color": "#1e2430",
+  "background_color": "#232323",
+  "theme_color": "#232323",
   "lang": "fr",
   "icons": [
     {

@@ -1,11 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="28" fill="#1e2430"/>
-  <rect x="24" y="24" width="80" height="80" rx="16" fill="url(#g)"/>
-  <path d="M44 88V60l20-14 20 14v28H70V72H58v16H44z" fill="#ffffff"/>
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#3b82f6"/>
-      <stop offset="1" stop-color="#4f46e5"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="50" fill="#232323"/>
+  <path d="M74 32 A32 32 0 1 0 74 68" fill="none" stroke="#ffffff" stroke-width="8.5" stroke-linecap="round"/>
+  <path d="M74 32 L61.5 32" fill="none" stroke="#ffffff" stroke-width="8.5" stroke-linecap="round"/>
+  <text x="49.5" y="53" text-anchor="middle" dominant-baseline="central" fill="#ffffff" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="33" letter-spacing="-1.5">SH</text>
 </svg>

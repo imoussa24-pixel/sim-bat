@@ -191,7 +191,7 @@ export async function calendrierEntreprise(): Promise<CalendrierOuvre> {
 
 export async function infosEntreprise() {
   return {
-    nom: await lireParametre('entreprise_nom', 'SIM-BAT BTP'),
+    nom: await lireParametre('entreprise_nom', 'SIM-HANDLING Corporation'),
     adresse: await lireParametre('entreprise_adresse', 'Boulevard Mali Béro, Niamey — NIGER'),
     tel: await lireParametre('entreprise_tel', '+227 20 73 45 67'),
     email: await lireParametre('entreprise_email', 'contact@simbat.ne'),

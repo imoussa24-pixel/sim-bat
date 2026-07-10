@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { Building2, Loader2, LogIn } from 'lucide-react'
+import { Loader2, LogIn } from 'lucide-react'
+import { Logo } from './components/Logo'
 import { ecrireSession, lireSession, post, surChangementSession, type Utilisateur } from './lib/api'
 
 interface ContexteAuth {
@@ -87,13 +88,11 @@ export function PageConnexion() {
         }}
       />
       <div className="relative w-full max-w-md [animation:surgir_0.5s_cubic-bezier(0.22,1,0.36,1)]">
-        <div className="mb-6 flex items-center justify-center gap-3 text-white">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-900/50">
-            <Building2 size={26} />
-          </div>
-          <div>
-            <div className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-2xl font-bold leading-none text-transparent">BatiFlow</div>
-            <div className="text-xs text-slate-400">SIM-BAT — Gestion d'entreprise BTP</div>
+        <div className="mb-6 flex items-center justify-center gap-3.5 text-white">
+          <Logo className="h-14 w-14" sombreFond />
+          <div className="leading-none">
+            <div className="text-2xl font-extrabold tracking-tight2 text-white">SIM-HANDLING</div>
+            <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">Corporation</div>
           </div>
         </div>
         <form onSubmit={soumettre} className="carte border-white/40 bg-white/95 p-7 !shadow-2xl backdrop-blur-xl">

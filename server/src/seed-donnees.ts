@@ -52,7 +52,7 @@ export async function executerSeed(prisma: PrismaClient) {
   console.log('— Paramètres entreprise & calendrier…')
   await prisma.parametre.createMany({
     data: [
-      { cle: 'entreprise_nom', valeur: 'SIM-BAT BTP' },
+      { cle: 'entreprise_nom', valeur: 'SIM-HANDLING Corporation' },
       { cle: 'entreprise_adresse', valeur: 'Boulevard Mali Béro, Plateau — Niamey, NIGER' },
       { cle: 'entreprise_tel', valeur: '+227 20 73 45 67' },
       { cle: 'entreprise_email', valeur: 'contact@simbat.ne' },
